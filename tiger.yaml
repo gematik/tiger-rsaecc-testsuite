@@ -1,0 +1,142 @@
+servers:
+  proxykon:
+    type: tigerProxy
+    startupTimeoutSec: 60
+    tigerProxyConfiguration:
+      proxyLogLevel: ${tiger.loglevel}
+      proxyPort: ${data.connector.port}
+      adminPort: ${data.connector.adminport}
+      rewriteHostHeader: true
+      proxyRoutes:
+        - from: /
+          to: ${data.connector.address_konnektor}
+          authentication:
+            username: ${data.connector.username_konnektor}
+            password: ${data.connector.password_konnektor}
+      modifications:
+        # the first condition is gematik intern only
+        - condition: isResponse
+          regexFilter: ${data.connector.address_konnektor}
+          name: replace hostname
+          targetElement: $.body
+          replaceWith: http://127.0.0.1:${data.connector.port}
+        # Sign Document
+        - condition: "isRequest && $.header.soapaction == 'http://ws.gematik.de/conn/SignatureService/v7.5#SignDocument' && $.body.Envelope.Body.SignDocument.Crypt != null"
+          regexFilter: '>(RSA|RSA_ECC)<\/'
+          name: replace crypt in SignDocument
+          targetElement: "$.body"
+          replaceWith: ">RSA_ECC</"
+        - condition: "isRequest && $.header.soapaction == 'http://ws.gematik.de/conn/SignatureService/v7.5#SignDocument' && $.body.Envelope.Body.SignDocument.Crypt == null"
+          regexFilter: '<\/(?:\w*:)?CardHandle\s*>'
+          name: add crypt in SignDocument
+          targetElement: "$.body"
+          replaceWith: '$0<Crypt xmlns="http://ws.gematik.de/conn/SignatureService/v7.5">RSA_ECC</Crypt>'
+        # Check Certificate Expiration
+        - condition: "isRequest && $.header.soapaction == 'http://ws.gematik.de/conn/CertificateService/v6.0#CheckCertificateExpiration' && $.body.Envelope.Body.CheckCertificateExpiration.Crypt == null"
+          regexFilter: '<\/(?:\w*:)?Context\s*>'
+          name: insert crypt in CheckCertificateExpiration
+          targetElement: "$.body"
+          replaceWith: '$0<Crypt xmlns="http://ws.gematik.de/conn/CertificateService/v6.0">ECC</Crypt>'
+          # Encrypt Document
+        - condition: "isRequest && $.header.soapaction == 'http://ws.gematik.de/conn/EncryptionService/v6.1#EncryptDocument' && $.body.Envelope.Body.EncryptDocument.RecipientKeys.CertificateOnCard.Crypt != null"
+          regexFilter: '>(RSA|RSA_ECC|ECC)<\/'
+          name: change crypt in EncryptDocument
+          targetElement: "$.body"
+          replaceWith: '>ECC<\/'
+        - condition: "isRequest && $.header.soapaction == 'http://ws.gematik.de/conn/EncryptionService/v6.1#EncryptDocument' && $.body.Envelope.Body.EncryptDocument.RecipientKeys.CertificateOnCard.Crypt == null"
+          regexFilter: '<\/(?:\w*:)?CardHandle\s*>'
+          name: insert crypt in EncryptDocument
+          targetElement: "$.body"
+          replaceWith: '$0<Crypt xmlns="http://ws.gematik.de/conn/EncryptionService/v6.1">ECC</Crypt>'
+          # Read Card Certificate
+        - condition: "isRequest && $.header.soapaction == 'http://ws.gematik.de/conn/CertificateService/v6.0#ReadCardCertificate' && $.body.Envelope.Body.ReadCardCertificate.Crypt == null"
+          regexFilter: '<\/(?:\w*:)?ReadCardCertificate\s*>'
+          name: insert crypt in ReadCardCertificate
+          targetElement: "$.body"
+          replaceWith: '<Crypt xmlns="http://ws.gematik.de/conn/CertificateService/v6.0">ECC</Crypt>$0'
+        # External Authenticate
+        - condition: "isRequest && $.header.soapaction == 'http://ws.gematik.de/conn/SignatureService/v7.4#ExternalAuthenticate' && $.body.Envelope.Body.ExternalAuthenticate.OptionalInputs != null"
+          regexFilter: '<(?:\w*:)?OptionalInputs\s*>(?s).*<\/(?:\w*:)?OptionalInputs\s*>'
+          name: set OptionalInputs SignatureType to ECDSA, make sure there's no SignatureSchemes
+          targetElement: "$.body"
+          replaceWith: '<OptionalInputs xmlns="http://ws.gematik.de/conn/SignatureService/v7.4"><SignatureType xmlns="urn:oasis:names:tc:dss:1.0:core:schema">urn:bsi:tr:03111:ecdsa</SignatureType></OptionalInputs>'
+        - condition: "isRequest && $.header.soapaction == 'http://ws.gematik.de/conn/SignatureService/v7.4#ExternalAuthenticate' && $.body.Envelope.Body.ExternalAuthenticate.OptionalInputs == null"
+          regexFilter: '<(?:\w*:)?BinaryString'
+          name: insert OptionalInputs with SignatureType to ECDSA and no SignatureSchemes
+          targetElement: "$.body"
+          replaceWith: '<OptionalInputs xmlns="http://ws.gematik.de/conn/SignatureService/v7.4"><SignatureType xmlns="urn:oasis:names:tc:dss:1.0:core:schema">urn:bsi:tr:03111:ecdsa</SignatureType></OptionalInputs>$0'
+
+tigerProxy:
+  activeForwardAllLogging: true
+  skipTrafficEndpointsSubscription: false
+  proxyPort: 443
+  adminPort: 9011
+  trafficEndpoints:
+    - http://127.0.0.1:${data.connector.adminport}
+  activateRbelParsingFor:
+    - asn1
+    - erp-vau
+  keyFolders:
+    - "src/test/resources/erp-vau"
+  fileSaveInfo.writeToFile: true
+  activateForwardAllLogging: false
+  tls:
+    serverIdentities:
+      - "src/test/resources/erp-dev.app.ti-dienste.de_NIST_X509.p12;00"
+      - "src/test/resources/erp-ref.app.ti-dienste.de_NIST_X509.p12;00"
+      - "src/test/resources/idp-ref.zentral.idp.splitdns.ti-dienste.de_NIST_X509.p12;00"
+      - "src/test/resources/localhostIdentity.p12;00"
+    serverSslSuites:
+      - "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256"
+      - "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"
+    masterSecretsFile: target/tlsSecrets.txt
+  # proxy configuration
+  #forwardToProxy:
+  #  hostname: 10.11.98.80
+  #  port: 8080
+  rewriteHostHeader: true
+  proxyRoutes:
+    # route für den IDP
+    - from: /
+      to: https://10.31.196.4:443/
+      hosts: ["idp-ref.zentral.idp.splitdns.ti-dienste.de"]
+    # route für eRp RU Fachdienst
+    - from: /
+    #  to: https://10.31.195.10:443/
+      to: http://vauServer:8080
+      hosts: ["erp-ref.zentral.erp.splitdns.ti-dienste.de", "erp-ref.app.ti-dienste.de", "subscription-ref.zentral.erp.splitdns.ti-dienste.de"]
+    # route für eRp RU-DEV Fachdienst
+    - from: /
+      to: https://10.31.194.12:443/
+      hosts: ["erp-dev.zentral.erp.splitdns.ti-dienste.de", "erp-dev.app.ti-dienste.de", "subscription-dev.zentral.erp.splitdns.ti-dienste.de"]
+    - from: /
+      to: http://${data.dockerservices.idp.address}
+      hosts: ["idp-client-service"]
+    - from: /
+      to: http://${data.dockerservices.vauencryptingproxy.address}
+      hosts: ["vau-encrypting-proxy"]
+    - from: /
+      to: http://${data.dockerservices.vauencryptingproxypatient.address}
+      hosts: ["vau-encrypting-proxy_versicherten"]
+
+
+lib:
+  activateWorkflowUi: "true"
+  startBrowser: "false"
+  workflowUiPort: 9010
+  trafficVisualization: true
+  runTestsOnStart: true
+
+additionalConfigurationFiles:
+  - filename: data.yaml
+    baseKey: data
+
+logging:
+  level:
+    # activate tracing for a specific class
+    de.gematik.test.tiger.testenvmgr.TigerTestEnvMgr: TRACE
+    # activate tracing for all classes and subpackages of a package
+    de.gematik.test.tiger.proxy: TRACE
+    # activate tracing for the local Tiger Proxy. This logger has a special name due to its importance in the tiger test framework
+    localTigerProxy: TRACE
+    de.gematik.test.tiger.glue.TigerGlue: TRACE
