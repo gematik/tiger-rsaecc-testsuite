@@ -130,6 +130,8 @@ lib:
 additionalConfigurationFiles:
   - filename: data.yaml
     baseKey: data
+  - filename: data_internal.yaml
+    baseKey: data
 
 logging:
   level:

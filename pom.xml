@@ -5,7 +5,7 @@
 
     <groupId>de.gematik</groupId>
     <artifactId>tiger-rsaecc-testsuite</artifactId>
-    <version>1.0.1</version>
+    <version>1.0.2</version>
 
     <distributionManagement>
         <repository>
@@ -23,7 +23,7 @@
         <maven.compiler.target>17</maven.compiler.target>
 
         <!-- adapt to version of tiger that is available -->
-        <version.tiger>3.7.6</version.tiger>
+        <version.tiger>3.7.7</version.tiger>
         <dss.version>5.13.1</dss.version>
     </properties>
 

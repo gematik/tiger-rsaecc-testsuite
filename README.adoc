@@ -21,7 +21,7 @@ endif::[]
 
 == Einführung
 
-Die ECC-Testsuite unterstütz Primärsysteme bei der Prüfung auf ECC Kompatibilität. Dazu werden ausgewählte UseCases aus dem Bereich eRezept mit angepassten Konnektoroperationen unterstützt.
+Die ECC-Testsuite unterstützt Primärsysteme bei der Prüfung auf ECC Kompatibilität. Dazu werden ausgewählte UseCases aus dem Bereich eRezept mit angepassten Konnektoroperationen unterstützt.
 Der  https://github.com/gematik/tiger-ptv6-proxy[Tiger-PTV6-Proxy] wird vor den echten PTV5-Konnektor gesetzt und passt die Anfragen so an, dass alle kryptografischen Verfahren mit ECC durchgeführt werden. Dazu müssen unbedingt **Karten der Generation 2.1** benutzt werden.
 
 == Setup
@@ -46,7 +46,7 @@ Der Tiger-Proxy unterstützt TLSv1.2 und gibt Server Zertifikate zurück, welche
 
 * `erp-ref.app.ti-dienste.de_NIST_X509.p12`
 
-Zusätzlich wurden die unterstützen CipherSuiten wie folgt eingeschränkt:
+Zusätzlich wurden die unterstützten CipherSuiten wie folgt eingeschränkt:
 
 * `TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256`
 * `TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384`
@@ -55,7 +55,7 @@ Zusätzlich wurden die unterstützen CipherSuiten wie folgt eingeschränkt:
 
 Es muss das Routing der Nachrichten über den Tiger-Proxy der ECC-Testsuite erfolgen, um eine Auswertung dieser zu ermöglichen. Der Tiger-Proxy leitet die Anfragen an den Fachdienst weiter. Wichtig ist hierbei auch, dass in dem äußeren HTTP-Request auch der HTTP-Header "Host" für die Anfrage an den entsprechenden Fachdienst gesetzt ist, damit der Tiger-Proxy die Anfrage entsprechend nach dem Mitschnitt weiterleiten kann.
 
-Beispiel für den HTTP-Header, damit Tiger-Proxy korrekt routen kann.
+Beispiel für den HTTP-Header, damit der Tiger-Proxy korrekt routen kann.
 [source,httprequest]
 ----
 Host: erp-ref.zentral.erp.splitdns.ti-dienste.de
