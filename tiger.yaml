@@ -130,8 +130,9 @@ lib:
 additionalConfigurationFiles:
   - filename: data.yaml
     baseKey: data
-  - filename: data_internal.yaml
-    baseKey: data
+# for gematik internal testing only
+#  - filename: data_internal.yaml
+#    baseKey: data
 
 logging:
   level:
