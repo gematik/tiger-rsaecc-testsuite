@@ -2,8 +2,11 @@
   @PVS
 Feature: Rezept einstellen (GKV)
   Background:
-    Given TGR clear recorded messages
     Given TGR clear all default headers
+
+  @PVS
+  Szenario: clear recorded messages  
+    Given TGR clear recorded messages  
 
   @PVS
   Scenario: Test: E-Rezept erstellen
