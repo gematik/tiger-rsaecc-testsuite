@@ -1,27 +1,27 @@
 #Test für AVS
-@AVS
+@AVS @EREZEPT
 Feature: PKV-Abrechnungsinformationen bereitstellen
 
   Background:
-    Given TGR clear recorded messages
-    Given TGR clear all default headers
+    Given TGR lösche alle default headers
 
-  @AVS
+  Scenario: Vorbedingung: lösche alte Nachrichten
+    Given TGR lösche aufgezeichnete Nachrichten
+
   Scenario: Vorbedingung: Als Arztpraxis ein IDP Access Token abholen
-    Given TGR set default header "X-p12-bytes-base64" to "!{resolve(file('src/test/resources/Arztpraxis_SMCB_AUT_E256_X509.p12.base64'))}"
-    And TGR set default header "X-keystore-password" to "00"
-    And TGR set default header "X-scope" to "${data.idp.scope}"
-    And TGR set default header "X-discovery-document-address" to "${data.idp.discoveryDocumentAddress}"
-    And TGR set default header "X-client-id" to "${data.idp.clientId}"
-    And TGR set default header "X-redirect-uri" to "${data.idp.redirectUrl}"
-    When TGR send empty GET request to "${data.idp_client_service}"
-    And TGR find last request to path "/" with "$..receiver" matching "${data.dockerservices.idp.address}"
-    Then TGR current response with attribute "$.responseCode" matches "200"
-    And TGR store current response node text value at "$.body" in variable "erp.access_token_arztpraxis"
+    Given TGR setze den default header "X-p12-bytes-base64" auf den Wert "!{resolve(file('src/test/resources/Arztpraxis_SMCB_AUT_E256_X509.p12.base64'))}"
+    And TGR setze den default header "X-keystore-password" auf den Wert "00"
+    And TGR setze den default header "X-scope" auf den Wert "${data.idp.scope}"
+    And TGR setze den default header "X-discovery-document-address" auf den Wert "${data.idp.discoveryDocumentAddress}"
+    And TGR setze den default header "X-client-id" auf den Wert "${data.idp.clientId}"
+    And TGR setze den default header "X-redirect-uri" auf den Wert "${data.idp.redirectUrl}"
+    When TGR sende eine leere GET Anfrage an "${data.idp_client_service}"
+    And TGR finde die letzte Anfrage mit Pfad "/" und Knoten "$..receiver" der mit "${data.dockerservices.idp.address}" übereinstimmt
+    Then TGR prüfe aktuelle Antwort stimmt im Knoten "$.responseCode" überein mit "200"
+    And TGR speichere Wert des Knotens "$.body" der aktuellen Antwort in der Variable "erp.access_token_arztpraxis"
 
-  @AVS
   Scenario: Vorbedingung: Als Arzt ein E-Rezept erstellen
-    And TGR set default headers:
+    And TGR setze folgende default headers:
   """
     Content-Type  = application/fhir+xml; charset=UTF-8
     Accept        = application/fhir+xml; charset=UTF-8
@@ -29,7 +29,7 @@ Feature: PKV-Abrechnungsinformationen bereitstellen
     User-Agent    = ${data.user_agent_pvs}
   """
 
-    When TGR send POST request to "${data.address_fachdienst}/Task/$create" with multiline body:
+    When TGR sende eine POST Anfrage an "${data.address_fachdienst}/Task/$create" mit folgenden mehrzeiligen Daten:
   """
   <Parameters xmlns="http://hl7.org/fhir">
     <parameter>
@@ -41,27 +41,22 @@ Feature: PKV-Abrechnungsinformationen bereitstellen
     </parameter>
   </Parameters>
   """
-    And TGR find last request to path "/Task/$create"
-    And TGR print current request as rbel-tree
-    And TGR print current response as rbel-tree
+    And TGR finde die letzte Anfrage mit dem Pfad "/Task/$create"
+    Then TGR prüfe aktuelle Antwort stimmt im Knoten "$.responseCode" überein mit "201"
+    And TGR prüfe aktuelle Antwort stimmt im Knoten "$.body" nicht überein mit "^Error:.*"
 
-    Then TGR current response with attribute "$.responseCode" matches "201"
-    And TGR current response with attribute "$.body" does not match "^Error:.*"
+    And TGR speichere Wert des Knotens "$.body.Task.id.value" der aktuellen Antwort in der Variable "erp.task_id"
+    And TGR speichere Wert des Knotens "$.body.Task.identifier[?(lowerCase(@.system.value.basicPath) =$ 'accesscode')].value.value" der aktuellen Antwort in der Variable "erp.task_access_code"
+    And TGR speichere Wert des Knotens "$.body.Task.identifier[?(lowerCase(@.system.value.basicPath) =$ 'prescriptionid')].value.value" der aktuellen Antwort in der Variable "erp.task_prescription_id"
 
-    And TGR store current response node text value at "$.body.Task.id.value" in variable "erp.task_id"
-    And TGR store current response node text value at "$.body.Task.identifier[?(lowerCase(@.system.value.basicPath) =$ 'accesscode')].value.value" in variable "erp.task_access_code"
-    And TGR store current response node text value at "$.body.Task.identifier[?(lowerCase(@.system.value.basicPath) =$ 'prescriptionid')].value.value" in variable "erp.task_prescription_id"
-
-  @AVS
   Scenario: Vorbedingung: als Arzt das KBV Bundle signieren
-    Given TGR set global variable "erp.rnd_nr" to "!{randomHex(12)}"
+    Given TGR setze globale Variable "erp.rnd_nr" auf "!{randomHex(12)}"
     And Als Patient speichere ich meine KVNR in der Variable "erp.kvnr"
     And Speichere das aktuelle Datum in "erp.current_date"
     Then Als Arzt signiere ich "!{resolve(file('src/test/resources/Bundle_Arzt.xml'))}" und speichere es in der Variable in "erp.signed_document"
 
-  @AVS
   Scenario: Vorbedingung: Als Arzt das E-Rezept einstellen
-    And TGR set default headers:
+    And TGR setze folgende default headers:
   """
     Content-Type  = application/fhir+xml; charset=UTF-8
     Accept        = application/fhir+xml; charset=UTF-8
@@ -69,7 +64,7 @@ Feature: PKV-Abrechnungsinformationen bereitstellen
     X-AccessCode  = ${erp.task_access_code}
   """
 
-    When TGR send POST request to "${data.address_fachdienst}/Task/${erp.task_id}/$activate" with multiline body:
+    When TGR sende eine POST Anfrage an "${data.address_fachdienst}/Task/${erp.task_id}/$activate" mit folgenden mehrzeiligen Daten:
   """
   <Parameters xmlns="http://hl7.org/fhir">
     <parameter>
@@ -83,30 +78,25 @@ Feature: PKV-Abrechnungsinformationen bereitstellen
     </parameter>
   </Parameters>
   """
-    And TGR find last request to path "/Task/${erp.task_id}/$activate"
-    And TGR print current request as rbel-tree
-    And TGR print current response as rbel-tree
+    And TGR finde die letzte Anfrage mit dem Pfad "/Task/${erp.task_id}/$activate"
+    Then TGR prüfe aktuelle Antwort stimmt im Knoten "$.responseCode" überein mit "200"
+    And TGR prüfe aktuelle Antwort stimmt im Knoten "$.body" nicht überein mit "^Error:.*"
 
-    Then TGR current response with attribute "$.responseCode" matches "200"
-    And TGR current response with attribute "$.body" does not match "^Error:.*"
-
-  @AVS
   Scenario: Als Apotheker das E-Rezept abrufen
     Given TGR print variable "erp.task_access_code"
     Then TGR print variable "erp.task_id"
-    Given TGR pause test run execution with message "Bitte rufen Sie als Apotheker das E-Rezept mit TaskId: ${erp.task_id} und AccessCode: ${erp.task_access_code} ab."
-    And TGR find last request to path ".*" with "$.body.message.path.basicPath" matching "/Task/${erp.task_id}/$accept"
+    Given TGR pausiere Testausführung mit Nachricht "Bitte rufen Sie als Apotheker das E-Rezept mit TaskId: ${erp.task_id} und AccessCode: ${erp.task_access_code} ab."
+    And TGR finde die letzte Anfrage mit Pfad ".*" und Knoten "$.body.message.path.basicPath" der mit "/Task/${erp.task_id}/$accept" übereinstimmt
     And TGR print current response as rbel-tree
-    Then TGR current response with attribute "$.body.message.responseCode" matches "200"
-    And TGR store current response node text value at "$.body..identifier[?(lowerCase(@.system.value.basicPath) =$ 'secret')].value.value" in variable "erp.task_secret"
-    And TGR store current response node text value at "$.body..Binary.data.value" in variable "erp.signed_document"
-    And TGR store current response node text value at "$.body..identifier[?(lowerCase(@.system.value.basicPath) =$ 'prescriptionid')].value.value" in variable "erp.aps_prescription_id"
+    Then TGR prüfe aktuelle Antwort stimmt im Knoten "$.body.message.responseCode" überein mit "200"
+    And TGR speichere Wert des Knotens "$.body..identifier[?(lowerCase(@.system.value.basicPath) =$ 'secret')].value.value" der aktuellen Antwort in der Variable "erp.task_secret"
+    And TGR speichere Wert des Knotens "$.body..Binary.data.value" der aktuellen Antwort in der Variable "erp.signed_document"
+    And TGR speichere Wert des Knotens "$.body..identifier[?(lowerCase(@.system.value.basicPath) =$ 'prescriptionid')].value.value" der aktuellen Antwort in der Variable "erp.aps_prescription_id"
 
-    And TGR set global variable "erp.binary_data_value" to "!{base64Decode(getValue('erp.signed_document'))}"
-    And TGR set global variable "erp.aps_medication" to "!{'<Medication>' + subStringBefore(subStringAfter(getValue('erp.binary_data_value'), '<Medication>') , '</Medication>') + '</Medication>'}"
-    And TGR set global variable "erp.aps_medication_id" to "!{subStringBefore(subStringAfter(getValue('erp.aps_medication'), '<id value=\"'), '\"')}"
+    And TGR setze globale Variable "erp.binary_data_value" auf "!{base64Decode(getValue('erp.signed_document'))}"
+    And TGR setze globale Variable "erp.aps_medication" auf "!{'<Medication>' + subStringBefore(subStringAfter(getValue('erp.binary_data_value'), '<Medication>') , '</Medication>') + '</Medication>'}"
+    And TGR setze globale Variable "erp.aps_medication_id" auf "!{subStringBefore(subStringAfter(getValue('erp.aps_medication'), '<id value=\"'), '\"')}"
 
-  @AVS
   Scenario: Als Apotheker die E-Rezept-Abgabe vollziehen
     Given TGR print variable "erp.task_access_code"
     Then TGR print variable "erp.task_id"
@@ -114,27 +104,19 @@ Feature: PKV-Abrechnungsinformationen bereitstellen
     Then TGR print variable "erp.aps_medication"
     Then TGR print variable "erp.aps_medication_id"
 
-    Given TGR pause test run execution with message "Bitte vollziehen Sie als Apotheker die E-Rezept-Abgabe."
-    And TGR find last request to path ".*" with "$.body.message.path.basicPath" matching "/Task/${erp.task_id}/$close"
-    And TGR print current request as rbel-tree
-    And TGR print current response as rbel-tree
-    Then TGR current response with attribute "$.body.message.responseCode" matches "200"
-    And TGR current response with attribute "$.body.message.body" does not match "^Error:.*"
+    Given TGR pausiere Testausführung mit Nachricht "Bitte vollziehen Sie als Apotheker die E-Rezept-Abgabe."
+    And TGR finde die letzte Anfrage mit Pfad ".*" und Knoten "$.body.message.path.basicPath" der mit "/Task/${erp.task_id}/$close" übereinstimmt
+    Then TGR prüfe aktuelle Antwort stimmt im Knoten "$.body.message.responseCode" überein mit "200"
+    And TGR prüfe aktuelle Antwort stimmt im Knoten "$.body.message.body" nicht überein mit "^Error:.*"
 
-  @AVS
   Scenario: Als Apotheker den PKV-Abgabedatensatz signieren
-    Given TGR pause test run execution with message "Bitte signieren Sie als Apotheker den PKV-Abgabedatensatz auf einer HBA mit Generation 2.1."
-    And TGR find last request to path ".*/SignatureService" with "$.header.SOAPAction" matching ".*SignDocument"    
-    And TGR print current request as rbel-tree
-    And TGR print current response as rbel-tree
-    Then TGR current response with attribute "$.responseCode" matches "200"
-    And TGR current response with attribute "$.body" does not match "^Error:.*"
+    Given TGR pausiere Testausführung mit Nachricht "Bitte signieren Sie als Apotheker den PKV-Abgabedatensatz auf einer HBA mit Generation 2.1."
+    And TGR finde die letzte Anfrage mit Pfad ".*/SignatureService" und Knoten "$.header.SOAPAction" der mit ".*SignDocument" übereinstimmt
+    Then TGR prüfe aktuelle Antwort stimmt im Knoten "$.responseCode" überein mit "200"
+    And TGR prüfe aktuelle Antwort stimmt im Knoten "$.body" nicht überein mit "^Error:.*"
 
-  @AVS
   Scenario: Als Apotheker PKV-Abrechnungsinformationen bereitstellen
-    Given TGR pause test run execution with message "Bitte stellen Sie als Apotheker für das E-Rezept eine Abrechnungsinformation bereit."
-    Then TGR find last request to path ".*" with "$.body.message.path.basicPath" matching "/ChargeItem"
-    And TGR print current request as rbel-tree
-    And TGR print current response as rbel-tree
-    Then TGR current response with attribute "$.body.message.responseCode" matches "201"
-    And TGR current response with attribute "$.body.message.body" does not match "^Error:.*"
+    Given TGR pausiere Testausführung mit Nachricht "Bitte stellen Sie als Apotheker für das E-Rezept eine Abrechnungsinformation bereit."
+    Then TGR finde die letzte Anfrage mit Pfad ".*" und Knoten "$.body.message.path.basicPath" der mit "/ChargeItem" übereinstimmt
+    Then TGR prüfe aktuelle Antwort stimmt im Knoten "$.body.message.responseCode" überein mit "201"
+    And TGR prüfe aktuelle Antwort stimmt im Knoten "$.body.message.body" nicht überein mit "^Error:.*"

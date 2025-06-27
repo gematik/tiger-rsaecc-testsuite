@@ -1,46 +1,32 @@
 #Test für PVS
-  @PVS
+@PVS @EREZEPT
 Feature: Rezept einstellen (GKV)
   Background:
-    Given TGR clear all default headers
+    Given TGR lösche alle default headers
 
-  @PVS
-  Szenario: clear recorded messages  
-    Given TGR clear recorded messages  
+  Scenario: Vorbedingung: lösche alte Nachrichten
+    Given TGR lösche aufgezeichnete Nachrichten
 
-  @PVS
   Scenario: Test: E-Rezept erstellen
-    Given TGR pause test run execution with message "Bitte erstellen Sie ein E-Rezept."
+    Given TGR pausiere Testausführung mit Nachricht "Bitte erstellen Sie ein E-Rezept."
 
-    And TGR find last request to path ".*" with "$.body.message.path.basicPath" matching "/Task/$create"
-    And TGR print current request as rbel-tree
-    And TGR print current response as rbel-tree
+    And TGR finde die letzte Anfrage mit Pfad ".*" und Knoten "$.body.message.path.basicPath" der mit "/Task/$create" übereinstimmt
+    Then TGR prüfe aktuelle Antwort stimmt im Knoten "$.body.message.responseCode" überein mit "201"
+    And TGR prüfe aktuelle Antwort stimmt im Knoten "$.body.message.body" nicht überein mit "^Error:.*"
 
-    Then TGR current response with attribute "$.body.message.responseCode" matches "201"
-    And TGR current response with attribute "$.body.message.body" does not match "^Error:.*"
+    And TGR speichere Wert des Knotens "$.body.message.body.Task.id.value" der aktuellen Antwort in der Variable "erp.task_id"
 
-    And TGR store current response node text value at "$.body.message.body.Task.id.value" in variable "erp.task_id"
-
-  @PVS
   Scenario: Test: E-Rezept signieren
-    Given TGR pause test run execution with message "Bitte signieren Sie eine Verordnung auf einer Karte der Generation 2.1"
+    Given TGR pausiere Testausführung mit Nachricht "Bitte signieren Sie eine Verordnung auf einer Karte der Generation 2.1"
 
-    And TGR find last request to path ".*/SignatureService" with "$.header.SOAPAction" matching ".*SignDocument"
-    And TGR print current request as rbel-tree
-    And TGR print current response as rbel-tree
+    And TGR finde die letzte Anfrage mit Pfad ".*/SignatureService" und Knoten "$.header.SOAPAction" der mit ".*SignDocument" übereinstimmt
+    Then TGR prüfe aktuelle Antwort stimmt im Knoten "$.responseCode" überein mit "200"
+    And TGR prüfe aktuelle Antwort stimmt im Knoten "$.body" nicht überein mit "^Error:.*"
 
-    Then TGR current response with attribute "$.responseCode" matches "200"
-    And TGR current response with attribute "$.body" does not match "^Error:.*"
-
-  @PVS
   Scenario: Test: E-Rezept wurde korrekt eingestellt
-    Given TGR pause test run execution with message "Bitte stellen Sie das E-Rezept ein."
-
-    And TGR find last request to path ".*" with "$.body.message.path.basicPath" matching "/Task/${erp.task_id}/$activate"
-    And TGR print current request as rbel-tree
-    And TGR print current response as rbel-tree
-
-    Then TGR current response with attribute "$.body.message.responseCode" matches "200"
-    And TGR current response with attribute "$.body.message.body" does not match "^Error:.*"
+    Given TGR pausiere Testausführung mit Nachricht "Bitte stellen Sie das E-Rezept ein."
+    And TGR finde die letzte Anfrage mit Pfad ".*" und Knoten "$.body.message.path.basicPath" der mit "/Task/${erp.task_id}/$activate" übereinstimmt
+    Then TGR prüfe aktuelle Antwort stimmt im Knoten "$.body.message.responseCode" überein mit "200"
+    And TGR prüfe aktuelle Antwort stimmt im Knoten "$.body.message.body" nicht überein mit "^Error:.*"
 
 

@@ -1,0 +1,25 @@
+server:
+  port: 8080
+
+vau-proxy-server:
+  pu: false
+  cid-redirects:
+
+    - /VAU-Status
+
+    #authorization-service
+    - /epa/authz/v1/getNonce
+    - /epa/authz/v1/send_authorization_request_sc
+    - /epa/authz/v1/send_authcode_sc
+
+    # entitlement-service
+    - /epa/basic/api/v1/ps/entitlements
+
+client:
+  proxy:
+    enabled: false
+
+# Logging vau-proxy-client (trace - zeigt sehr viel...)
+logging:
+  level:
+    root: info

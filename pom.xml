@@ -5,7 +5,9 @@
 
     <groupId>de.gematik</groupId>
     <artifactId>tiger-rsaecc-testsuite</artifactId>
-    <version>1.0.2</version>
+    <name>tiger-rsaecc-testsuite</name>
+    <description>This is the RSAECC testsuite for e-rezepte and EPA.</description>
+    <version>1.0.3</version>
 
     <distributionManagement>
         <repository>
