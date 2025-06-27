@@ -21,7 +21,7 @@ endif::[]
 
 == Einführung
 
-Die ECC-Testsuite unterstützt Primärsysteme bei der Prüfung auf ECC Kompatibilität. Dazu werden ausgewählte UseCases aus dem Bereich eRezept mit angepassten Konnektoroperationen unterstützt.
+Die ECC-Testsuite unterstützt Primärsysteme bei der Prüfung auf ECC Kompatibilität. Dazu werden ausgewählte UseCases aus dem Bereich eRezept und EPA mit angepassten Konnektoroperationen unterstützt.
 Der  https://github.com/gematik/tiger-ptv6-proxy[Tiger-PTV6-Proxy] wird vor den echten PTV5-Konnektor gesetzt und passt die Anfragen so an, dass alle kryptografischen Verfahren mit ECC durchgeführt werden. Dazu müssen unbedingt **Karten der Generation 2.1** benutzt werden.
 
 == Setup
@@ -138,7 +138,7 @@ Dazu müssen die folgenden Einträge angepasst werden:
 == Testausführung
 
 Die ECC-Testsuite kann nur in einem Docker-Container ausgeführt werden.
-Per Default starten die PVS ECC-Testfälle. Um die Testfälle für AVS zu starten kann die .env Datei entsprechend bearbeitet werden.
+Per Default starten die E-Rezept PVS ECC-Testfälle. Um die Testfälle für AVS oder für EPA zu starten kann die .env Datei entsprechend bearbeitet werden.
 
 === Lokal (Docker)
 
@@ -236,6 +236,9 @@ Eine weitere Möglichkeit ist auf die Nutzung des Docker Volume zu verzichten. D
       - ./report:/app/report:rw
 ----
 
+== Fehlertickets
+Wenn Sie ein Fehlerticket eröffnen wollen für dieses Repository, nutzen Sie bitte den gematik Service Desk unter
+link:[https://service.gematik.de/servicedesk/customer/portal/22].
 
 == License
  

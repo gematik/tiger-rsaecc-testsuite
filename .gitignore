@@ -55,3 +55,4 @@ README_INTERNAL.md
 **/src/test/**/*_intern.feature
 dc-testsuite.override.yml
 data_internal.yaml
+tiger_internal.yaml

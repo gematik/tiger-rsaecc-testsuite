@@ -76,6 +76,7 @@ tigerProxy:
   activateRbelParsingFor:
     - asn1
     - erp-vau
+    - epa3-vau
   keyFolders:
     - "src/test/resources/erp-vau"
   fileSaveInfo.writeToFile: true
@@ -84,6 +85,10 @@ tigerProxy:
     serverIdentities:
       - "src/test/resources/erp-dev.app.ti-dienste.de_NIST_X509.p12;00"
       - "src/test/resources/erp-ref.app.ti-dienste.de_NIST_X509.p12;00"
+      - "src/test/resources/epa-as-1.ref.epa4all.de_NIST_X509.p12;00"
+      - "src/test/resources/epa-as-1.dev.epa4all.de_NIST_X509.p12;00"
+      - "src/test/resources/epa-as-2.ref.epa4all.de_NIST_X509.p12;00"
+      - "src/test/resources/epa-as-2.dev.epa4all.de_NIST_X509.p12;00"
       - "src/test/resources/idp-ref.zentral.idp.splitdns.ti-dienste.de_NIST_X509.p12;00"
       - "src/test/resources/localhostIdentity.p12;00"
     serverSslSuites:
@@ -100,6 +105,27 @@ tigerProxy:
     - from: /
       to: https://10.31.196.4:443/
       hosts: ["idp-ref.zentral.idp.splitdns.ti-dienste.de"]
+      matchForProxyType: false
+    # AS 1, IBM (RU-DEV) - "10.30.18.134/135/136/199/200/201"
+    - from: /
+      to: https://10.30.18.134:443/
+      hosts: ["epa-as-1.dev.epa4all.de"]
+      matchForProxyType: false
+    # AS 1, IBM (RU-REF) - "10.30.18.145/146/147/209/210/211"
+    - from: /
+      to: https://10.30.18.145:443/
+      hosts: ["epa-as-1.ref.epa4all.de"]
+      matchForProxyType: false
+    # AS 2, RISE (RU-DEV) - "10.30.19.43"
+    - from: /
+      to: https://10.30.19.43:443/
+      hosts: ["epa-as-2.dev.epa4all.de"]
+      matchForProxyType: false
+    # AS 2, RISE (RU-REF) - "10.30.19.43"
+    - from: /
+      to: https://10.30.19.23:443/
+      hosts: ["epa-as-2.ref.epa4all.de"]
+      matchForProxyType: false
     # route für eRp RU Fachdienst
     - from: /
     #  to: https://10.31.195.10:443/
@@ -133,6 +159,9 @@ additionalConfigurationFiles:
 # for gematik internal testing only
 #  - filename: data_internal.yaml
 #    baseKey: data
+# for gematik internal testing only for epa only
+#  - filename: tiger_internal.yaml
+#    baseKey: tiger
 
 logging:
   level:

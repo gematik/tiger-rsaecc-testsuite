@@ -1,5 +1,8 @@
 # Release Notes tiger-rsaecc-testsuite
 
+## Release 1.0.3
+- EPA configuration and tests added
+
 ## Release 1.0.2
 - TGRRTS-1: update tiger in pom
 
