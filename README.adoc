@@ -21,7 +21,7 @@ endif::[]
 
 == Einführung
 
-Die ECC-Testsuite unterstützt Primärsysteme bei der Prüfung auf ECC Kompatibilität. Dazu werden ausgewählte UseCases aus dem Bereich eRezept und EPA mit angepassten Konnektoroperationen unterstützt.
+Die ECC-Testsuite unterstützt Primärsysteme bei der Prüfung auf ECC Kompatibilität. Dazu werden ausgewählte UseCases aus dem Bereich eRezept und der elektronischen Patientenakte (ePA) mit angepassten Konnektoroperationen unterstützt.
 Der  https://github.com/gematik/tiger-ptv6-proxy[Tiger-PTV6-Proxy] wird vor den echten PTV5-Konnektor gesetzt und passt die Anfragen so an, dass alle kryptografischen Verfahren mit ECC durchgeführt werden. Dazu müssen unbedingt **Karten der Generation 2.1** benutzt werden.
 
 == Setup
@@ -45,6 +45,8 @@ image::/doc/img/setup.png[Setup]
 Der Tiger-Proxy unterstützt TLSv1.2 und gibt Server Zertifikate zurück, welche den Zertifikaten des Fachdienstes in der RU entspricht. Siehe folgende Datei:
 
 * `erp-ref.app.ti-dienste.de_NIST_X509.p12`
+* `epa-as-1.ref.epa4all.de_NIST_X509.p12`
+* `epa-as-2.ref.epa4all.de_NIST_X509.p12`
 
 Zusätzlich wurden die unterstützten CipherSuiten wie folgt eingeschränkt:
 
@@ -60,6 +62,11 @@ Beispiel für den HTTP-Header, damit der Tiger-Proxy korrekt routen kann.
 ----
 Host: erp-ref.zentral.erp.splitdns.ti-dienste.de
 ----
+bzw.
+[source,httprequest]
+----
+Host: epa-as-1.ref.epa4all.de
+----
 
 Es gibt keine Vorgabe WIE diese Umleitung erfolgen muss, zwei Wege scheinen jedoch sinnvoll:
 
@@ -70,8 +77,10 @@ Die Routen sind entsprechend konfiguriert, damit der Verkehr hier an den eRp Fac
 
 Hierbei sind folgende Punkte zu beachten:
 
-* Primärsystem seitig wird die ECC-Testsuite als Proxy konfiguriert (e.g. `localhost:443`). Hiermit werden die Requests über die ECC-Testsuite an den eRp Fachdienst gesendet. Ein Request an `https://erp-ref.zentral.erp.splitdns.ti-dienste.de/foobar`, via ECC-Testsuite mit `localhost:443` entspricht somit `curl -x localhost:443 erp-ref.zentral.erp.splitdns.ti-dienste.de/foobar`)
-* Dabei ist darauf zu achten, dass der HTTP Header im (äußeren) HTTP Request dennoch den FQDN des Fachdienstes enthält (e.g `Host: erp-ref.zentral.erp.splitdns.ti-dienste.de`).
+* Primärsystem seitig wird die ECC-Testsuite als Proxy konfiguriert (e.g. `localhost:443`). Hiermit werden die Requests über die ECC-Testsuite an den eRp Fachdienst bzw. an die Aktensysteme gesendet.
+    - Ein Request an `https://erp-ref.zentral.erp.splitdns.ti-dienste.de/foobar`, via ECC-Testsuite mit `localhost:443` entspricht somit `curl -x localhost:443 erp-ref.zentral.erp.splitdns.ti-dienste.de/foobar`)
+    - Ein Request an `https://epa-as-1.ref.epa4all.de/foobar`, via ECC-Testsuite mit `localhost:443` entspricht somit `curl -x localhost:443 epa-as-1.ref.epa4all.de/foobar`)
+* Dabei ist darauf zu achten, dass der HTTP Header im (äußeren) HTTP Request dennoch den FQDN des Fachdienstes enthält (e.g `Host: erp-ref.zentral.erp.splitdns.ti-dienste.de`, `Host: epa-as-1.ref.epa4all.de`).
 * Eine zusätzliche Manipulation der DNS Auflösung (Variante 2) in der `hosts` Datei ist nicht notwendig.
 
 === DNS Manipulation (Variante 2)
@@ -84,6 +93,8 @@ Beispiel, wenn das Primärsystem auf dem gleichen Rechner läuft, wie die Testsu
 ----
 127.0.0.1    erp-ref.zentral.erp.splitdns.ti-dienste.de
 127.0.0.1    erp-ref.app.ti-dienste.de
+127.0.0.1    epa-as-1.ref.epa4all.de
+127.0.0.1    epa-as-2.ref.epa4all.de
 ----
 
 [IMPORTANT]
