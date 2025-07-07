@@ -7,7 +7,7 @@
     <artifactId>tiger-rsaecc-testsuite</artifactId>
     <name>tiger-rsaecc-testsuite</name>
     <description>This is the RSAECC testsuite for e-rezepte and EPA.</description>
-    <version>1.0.3</version>
+    <version>1.0.4</version>
 
     <distributionManagement>
         <repository>
@@ -25,7 +25,7 @@
         <maven.compiler.target>17</maven.compiler.target>
 
         <!-- adapt to version of tiger that is available -->
-        <version.tiger>3.7.7</version.tiger>
+        <version.tiger>4.0.7</version.tiger>
         <dss.version>5.13.1</dss.version>
     </properties>
 
