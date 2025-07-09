@@ -96,9 +96,6 @@ tigerProxy:
       - "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"
     masterSecretsFile: target/tlsSecrets.txt
   # proxy configuration
-  #forwardToProxy:
-  #  hostname: 10.11.98.80
-  #  port: 8080
   rewriteHostHeader: true
   proxyRoutes:
     # route für den IDP

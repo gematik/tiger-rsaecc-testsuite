@@ -70,6 +70,16 @@ Host: epa-as-1.ref.epa4all.de
 
 Es gibt keine Vorgabe WIE diese Umleitung erfolgen muss, zwei Wege scheinen jedoch sinnvoll:
 
+=== Zugang zur RU prüfen
+Wichtig: Bitte prüfen Sie mit diesem curl Befehl, ob Sie von Ihrem lokalen Rechner Zugang zur RU haben:
+
+[source,bash]
+----
+curl -v https://erp-dev.zentral.erp.splitdns.ti-dienste.de/VAUCertificate
+----
+
+Sollten Sie keinen Zugang haben, wenden Sie sich bitte an Ihre IT.
+
 === Forward Proxy (Variante 1)
 
 In dieser Konfiguration kann die ECC-Testsuite als Forward-Proxy für das Primärsystem eingerichtet werden.
