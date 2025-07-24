@@ -1,5 +1,8 @@
 # Release Notes tiger-rsaecc-testsuite
 
+## Release 1.0.6
+- update erp-idp-client
+
 ## Release 1.0.5
 - fix forward-url of vau-encrypting-client
 
