@@ -7,7 +7,7 @@
     <artifactId>tiger-rsaecc-testsuite</artifactId>
     <name>tiger-rsaecc-testsuite</name>
     <description>This is the RSAECC testsuite for e-rezepte and EPA.</description>
-    <version>1.0.6</version>
+    <version>1.0.7</version>
 
     <distributionManagement>
         <repository>
