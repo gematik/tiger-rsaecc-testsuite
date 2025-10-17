@@ -1,5 +1,9 @@
 # Release Notes tiger-rsaecc-testsuite
 
+## Release 1.0.7
+- update erp-vau-proxy-client, erp-vau-proxy-server 
+- remove downloadDep.sh
+
 ## Release 1.0.6
 - update erp-idp-client
 
