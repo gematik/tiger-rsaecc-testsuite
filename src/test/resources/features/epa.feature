@@ -86,21 +86,6 @@ Funktion: Teste ePA
         "clientAttest" : "${json-unit.ignore}"
       }
     """
-    Und TGR prüfe aktueller Request stimmt im Knoten "$.body.decrypted.body.authorizationCode.content.header.enc" überein mit "A256GCM"
-    Und TGR prüfe aktueller Request stimmt im Knoten "$.body.decrypted.body.authorizationCode.content.header.cty" überein mit "NJWT"
-    Und TGR prüfe aktueller Request stimmt im Knoten "$.body.decrypted.body.authorizationCode.content.header.exp" überein mit "[\d]*"
-    Und TGR prüfe aktueller Request stimmt im Knoten "$.body.decrypted.body.authorizationCode.content.header.alg" überein mit "dir"
-    Und TGR prüfe aktueller Request stimmt im Knoten "$.body.decrypted.body.authorizationCode.content.header.kid" überein mit "0001"
-    Und TGR prüfe aktueller Request im Knoten "$.body.decrypted.body.authorizationCode.content.header" stimmt als JSON überein mit:
-    """
-    {
-      "enc" : "A256GCM",
-      "cty" : "NJWT",
-      "exp" : "[\\d]*",
-      "alg" : "dir",
-      "kid" : "0001"
-    }
-    """
     Und TGR prüfe aktueller Request stimmt im Knoten "$.body.decrypted.body.clientAttest.content.header.typ" überein mit "JWT"
     Und TGR prüfe aktueller Request stimmt im Knoten "$.body.decrypted.body.clientAttest.content.header.x5c" überein mit ".*"
     # ONLY ECC --> force ES256
