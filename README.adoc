@@ -8,6 +8,10 @@ ifdef::env-github[]
 ++++
 endif::[]
 
+= Project status
+
+This project is archived and is no longer actively maintained. The repository is scheduled for deletion on June 1, 2027.
+
 = ECC-Testsuite
 
 == Inhaltsverzeichnis
